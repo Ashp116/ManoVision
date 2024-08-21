@@ -17,7 +17,7 @@ new_mouse_origin = None
 cube_size = 1.0  # Default size of the cube
 
 debug_mode = False
-draw_mouse = False
+draw_mouse = True
 
 def get_mouse_pos(lmList):
     # Calculate the position based on the hand landmarks
@@ -73,15 +73,19 @@ def main():
             print("Error: Could not read frame.")
             break
 
-        # Hadamard Quotient
-        # scaled_frame_size_mul = np.divide(np.flip(np.array(list(frame.shape)))[1:3], np.array([800, 600]))
-        scaled_frame_size_mul = np.diag(
-            np.linalg.inv(
-                np.array([[frame.shape[1], 0],
-                          [0, frame.shape[0]]]))
-            .dot(np.array([[800, 0],
-                           [0, 600]]))
-        )
+        # The cube is rendered at 800 x 600 while the original video different size.
+        # This matrix gives the scalar multiplier for the width and height of the original video mouse position to the
+        # new mouse position in 800 x 600 space.
+        # Hadamard Quotient:
+        scaled_frame_size_mul = np.divide(np.array([800, 600]), np.flip(np.array(list(frame.shape)))[1:3]) # Hadamard Quotient
+
+        # scaled_frame_size_mul = np.diag(
+        #     np.linalg.inv(
+        #         np.array([[frame.shape[1], 0],
+        #                   [0, frame.shape[0]]]))
+        #     .dot(np.array([[800, 0],
+        #                    [0, 600]]))
+        # )
 
         frame = detector.findHands(cv2.flip(frame, 1), draw=debug_mode)
         lmList = detector.find_position(frame=frame)
